@@ -1,5 +1,8 @@
 package josh
 
+// An error response. The structure follows the JSON:API spec.
+//
+// https://jsonapi.org/format/#error-objects
 type Error struct {
 	// ID is a unique identifier for this particular occurrence of a problem.
 	ID string `json:"id,omitempty"`
@@ -22,6 +25,8 @@ type Error struct {
 	Code string `json:"code,omitempty"`
 
 	// Source is a reference to the primary source of the error.
+	//
+	// Constructed with either [SourcePointer], [SourceParameter], or [SourceHeader].
 	Source source `json:"source,omitempty"`
 
 	// Meta is an object containing non-standard meta-information about the error.

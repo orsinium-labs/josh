@@ -3,6 +3,9 @@ package josh
 import "github.com/orsinium-labs/josh/statuses"
 
 // Respond with 200 status code.
+//
+// https://jsonapi.org/format/#fetching-resources-responses-200
+// https://developer.mozilla.org/en-US/docs/Web/HTTP/Status/200
 func Ok[T any](v T) Resp[T] {
 	return Resp[T]{
 		Status:  statuses.OK,
@@ -42,5 +45,40 @@ func NoContent[T any]() Resp[T] {
 func NotModified[T any]() Resp[T] {
 	return Resp[T]{
 		Status: statuses.NotModified,
+	}
+}
+
+// Respond with 400 status code.
+func BadRequest[T any](err Error) Resp[T] {
+	return Resp[T]{
+		Status: statuses.BadRequest,
+		Errors: []Error{err},
+	}
+}
+
+// Respond with 401 status code.
+func Unauthorized[T any](err Error) Resp[T] {
+	return Resp[T]{
+		Status: statuses.Unauthorized,
+		Errors: []Error{err},
+	}
+}
+
+// Respond with 403 status code.
+func Forbidden[T any](err Error) Resp[T] {
+	return Resp[T]{
+		Status: statuses.Forbidden,
+		Errors: []Error{err},
+	}
+}
+
+// Respond with 404 status code.
+//
+// https://jsonapi.org/format/#fetching-resources-responses-404
+// https://developer.mozilla.org/en-US/docs/Web/HTTP/Status/404
+func NotFound[T any](err Error) Resp[T] {
+	return Resp[T]{
+		Status: statuses.NotFound,
+		Errors: []Error{err},
 	}
 }

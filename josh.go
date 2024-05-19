@@ -8,8 +8,6 @@ import (
 	"github.com/orsinium-labs/josh/statuses"
 )
 
-type stringLiteral string
-
 type Handler[T any] func(*http.Request) Resp[T]
 
 func Wrap[T any](h Handler[T]) http.HandlerFunc {
@@ -19,17 +17,29 @@ func Wrap[T any](h Handler[T]) http.HandlerFunc {
 	}
 }
 
+// Resp is a response type.
+//
+// The generic type T is the type of the data response.
 type Resp[T any] struct {
+	// The response status code. Defaults to [statuses.OK].
 	Status  statuses.Status
 	Content T
 	Errors  []Error
 }
 
+// Void is a type alias for Resp for when the endpoint does not return any data ever.
+//
+// The endpoint still can return [NoContent], [NotModified], or an error.
+type Void = Resp[struct{}]
+
 // Write response into the connection.
 func (r Resp[T]) Write(w http.ResponseWriter) {
 	// Write content type and status code.
 	if w.Header().Get("Content-Type") == "" {
-		w.Header().Add("Content-Type", "application/json; charset=utf-8")
+		w.Header().Add("Content-Type", "application/vnd.api+json")
+	}
+	if r.Status == 0 {
+		r.Status = statuses.OK
 	}
 	w.WriteHeader(int(r.Status))
 
@@ -38,15 +48,13 @@ func (r Resp[T]) Write(w http.ResponseWriter) {
 		return
 	}
 	if r.Errors != nil {
-		r.writeError(w)
+		r.writeErrors(w)
 		return
 	}
-	// TODO: log error
-	encoder := json.NewEncoder(w)
-	_ = encoder.Encode(r.Content)
+	r.writeData(w)
 }
 
-func (r Resp[T]) writeError(w http.ResponseWriter) {
+func (r Resp[T]) writeErrors(w http.ResponseWriter) {
 	encoder := json.NewEncoder(w)
 	for _, err := range r.Errors {
 		if err.Code == "" {
@@ -59,8 +67,17 @@ func (r Resp[T]) writeError(w http.ResponseWriter) {
 	// https://jsonapi.org/format/#error-objects
 	v := struct {
 		Errors []Error `json:"errors"`
-	}{Errors: r.Errors}
+	}{r.Errors}
 	// TODO: log error
+	_ = encoder.Encode(v)
+}
+
+func (r Resp[T]) writeData(w http.ResponseWriter) {
+	// TODO: log error
+	encoder := json.NewEncoder(w)
+	v := struct {
+		Data T `json:"data"`
+	}{r.Content}
 	_ = encoder.Encode(v)
 }
 

@@ -1,6 +1,7 @@
 package josh
 
 import (
+	"context"
 	"encoding/json"
 	"net/http"
 	"strconv"
@@ -8,20 +9,35 @@ import (
 	"github.com/orsinium-labs/josh/statuses"
 )
 
+type contextKey string
+type literal string
+
+const headersKey contextKey = "headers"
+
+// Handler function type. Accepts a request, returns a response.
 type Handler[T any] func(*http.Request) Resp[T]
 
+// Wrap a [Handler] function to make it compatible with stdlib [http.HandlerFunc].
 func Wrap[T any](h Handler[T]) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
+		ctx := context.WithValue(r.Context(), headersKey, w.Header())
+		r = r.WithContext(ctx)
 		resp := h(r)
 		resp.Write(w)
 	}
+}
+
+// Set a response header.
+func SetHeader(r *http.Request, key literal, value string) {
+	headers := r.Context().Value(headersKey).(http.Header)
+	headers.Set(string(key), value)
 }
 
 // Resp is a response type.
 //
 // The generic type T is the type of the data response.
 type Resp[T any] struct {
-	// The response status code. Defaults to [statuses.OK].
+	// The response status code.
 	Status  statuses.Status
 	Content T
 	Errors  []Error
@@ -38,11 +54,6 @@ func (r Resp[T]) Write(w http.ResponseWriter) {
 	if w.Header().Get("Content-Type") == "" {
 		w.Header().Add("Content-Type", "application/vnd.api+json")
 	}
-	if r.Status == 0 {
-		r.Status = statuses.OK
-	}
-	w.WriteHeader(int(r.Status))
-
 	// If status code allows for body, write the JSON response.
 	if !bodyAllowedForStatus(r.Status) {
 		return
@@ -55,6 +66,10 @@ func (r Resp[T]) Write(w http.ResponseWriter) {
 }
 
 func (r Resp[T]) writeErrors(w http.ResponseWriter) {
+	if r.Status == 0 {
+		r.Status = statuses.BadRequest
+	}
+	w.WriteHeader(int(r.Status))
 	encoder := json.NewEncoder(w)
 	for _, err := range r.Errors {
 		if err.Code == "" {
@@ -73,11 +88,15 @@ func (r Resp[T]) writeErrors(w http.ResponseWriter) {
 }
 
 func (r Resp[T]) writeData(w http.ResponseWriter) {
-	// TODO: log error
+	if r.Status == 0 {
+		r.Status = statuses.OK
+	}
+	w.WriteHeader(int(r.Status))
 	encoder := json.NewEncoder(w)
 	v := struct {
 		Data T `json:"data"`
 	}{r.Content}
+	// TODO: log error
 	_ = encoder.Encode(v)
 }
 

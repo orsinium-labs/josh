@@ -1,5 +1,7 @@
 # josh
 
+[ [📚 docs](https://pkg.go.dev/github.com/orsinium-labs/josh) ] [ [🐙 github](https://github.com/orsinium-labs/josh) ]
+
 Go library making it safe and easy to write [JSON:API](https://jsonapi.org/) services. You could call it a we framework except (unlike other web frameworks) josh is very minimalistic. It works together with [net/http](https://pkg.go.dev/net/http) and doesn't reimplement anything that Go standard library already does well.
 
 * Takes care of JSON response serialization and request deserialization.
@@ -8,6 +10,7 @@ Go library making it safe and easy to write [JSON:API](https://jsonapi.org/) ser
 * Small an easy to learn.
 * Zero dependency.
 * Modular and works great with stdlib or any other web framework.
+* Uses the latest Go features: request router, structured logging, generics.
 * Statically ensures that you don't make common mistakes:
   * Don't forget the status code.
   * Don't set body for statuses that don't support body.
@@ -28,4 +31,44 @@ github.com/orsinium-labs/josh
 
 ## 🔧 Usage
 
-...
+Here is a simple handler:
+
+```go
+func handler(r *http.Request) josh.Resp[string] {
+  // Read JSON request body
+  msg, err := josh.Read[string](r)
+  if err != nil {
+    // Return an error for invalid request
+    return josh.BadRequest[string](josh.Error{
+      Title:  "Cannot parse JSON request",
+      Detail: err.Error(),
+    })
+  }
+  // Return the uppercase message
+  msg = strings.ToUpper(msg)
+  return josh.Ok(msg)
+}
+```
+
+And here is a server using it:
+
+```go
+func main() {
+  s := josh.NewServer(":8080")
+  r := josh.Router{
+    "/": {
+      GET: josh.Wrap(handler),
+    },
+  }
+  r.Register(nil)
+  _ = s.ListenAndServe()
+}
+```
+
+Or if you don't want to use the router and the custom server:
+
+```go
+func main() {
+  http.ListenAndServe(":8080", josh.Wrap(handler))
+}
+```

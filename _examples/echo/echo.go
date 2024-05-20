@@ -43,7 +43,12 @@ func handler(r *http.Request) josh.Resp[string] {
 
 func main() {
 	s := josh.NewServer(":8080")
-	s.Handler = josh.Wrap(handler)
+	r := josh.Router{
+		"/": {
+			GET: josh.Wrap(handler),
+		},
+	}
+	r.Register(nil)
 	fmt.Println("listening on http://localhost:8080")
 	_ = s.ListenAndServe()
 }

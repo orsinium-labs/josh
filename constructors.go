@@ -8,24 +8,24 @@ import "github.com/orsinium-labs/josh/statuses"
 // https://developer.mozilla.org/en-US/docs/Web/HTTP/Status/200
 func Ok[T any](v T) Resp[T] {
 	return Resp[T]{
-		Status:  statuses.OK,
-		Content: v,
+		Status: statuses.OK,
+		Data:   v,
 	}
 }
 
 // Respond with 201 status code.
 func Created[T any](v T) Resp[T] {
 	return Resp[T]{
-		Status:  statuses.Created,
-		Content: v,
+		Status: statuses.Created,
+		Data:   v,
 	}
 }
 
 // Respond with 202 status code.
 func Accepted[T any](v T) Resp[T] {
 	return Resp[T]{
-		Status:  statuses.Accepted,
-		Content: v,
+		Status: statuses.Accepted,
+		Data:   v,
 	}
 }
 

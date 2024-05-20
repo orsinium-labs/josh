@@ -10,7 +10,6 @@ import (
 )
 
 type contextKey string
-type literal string
 
 const headersKey contextKey = "headers"
 
@@ -28,22 +27,46 @@ func Wrap[T any](h Handler[T]) http.HandlerFunc {
 }
 
 // Set a response header.
-func SetHeader(r *http.Request, key literal, value string) {
+func SetHeader(r *http.Request, key, value string) {
 	headers := r.Context().Value(headersKey).(http.Header)
-	headers.Set(string(key), value)
+	headers.Set(key, value)
 }
 
 // Resp is a response type.
 //
 // The generic type T is the type of the data response.
+//
+// If the handler never returns data, use [Void] instead.
+//
+// https://jsonapi.org/format/#document-top-level
 type Resp[T any] struct {
 	// The response status code.
-	Status  statuses.Status
-	Content T
-	Errors  []Error
+	//
+	// If possible, don't create empty responses directly.
+	// Instead, use one of the constructors: [NoContent] or [NotModified].
+	//
+	// https://developer.mozilla.org/en-US/docs/Web/HTTP/Status
+	Status statuses.Status `json:"-"`
+
+	// The document's "primary data" returned on success.
+	//
+	// If possible, don't create sucessful responses directly.
+	// Instead, use one of the constructors: [Ok], [Created], or [Accepted].
+	//
+	// https://jsonapi.org/format/#fetching-resources-responses
+	Data T `json:"data,omitempty"`
+
+	// A slice of errors returned on failure.
+	//
+	// If possible, don't create error responses directly.
+	// Instead, use one of the constructors: [BadRequest], [Unauthorized],
+	// [Forbidden], or [NotFound].
+	//
+	// https://jsonapi.org/format/#error-objects
+	Errors []Error `json:"errors,omitempty"`
 }
 
-// Void is a type alias for Resp for when the endpoint does not return any data ever.
+// Void is a type alias for [Resp] for when the handler does not return any data ever.
 //
 // The endpoint still can return [NoContent], [NotModified], or an error.
 type Void = Resp[struct{}]
@@ -95,7 +118,7 @@ func (r Resp[T]) writeData(w http.ResponseWriter) {
 	encoder := json.NewEncoder(w)
 	v := struct {
 		Data T `json:"data"`
-	}{r.Content}
+	}{r.Data}
 	// TODO: log error
 	_ = encoder.Encode(v)
 }

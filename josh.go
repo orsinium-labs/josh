@@ -8,6 +8,7 @@ import (
 	"strconv"
 	"time"
 
+	"github.com/orsinium-labs/josh/headers"
 	"github.com/orsinium-labs/josh/statuses"
 )
 
@@ -45,9 +46,9 @@ func Wrap[T any](h Handler[T]) http.HandlerFunc {
 }
 
 // Set a response header.
-func SetHeader(r Req, key, value string) {
+func SetHeader(r Req, key headers.Header, value string) {
 	headers := r.Context().Value(headersKey).(http.Header)
-	headers.Set(key, value)
+	headers.Set(string(key), value)
 }
 
 // Read and parse request body as JSON.

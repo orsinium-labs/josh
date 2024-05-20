@@ -103,7 +103,10 @@ type Resp[T any] struct {
 // Void is a type alias for [Resp] for when the handler does not return any data ever.
 //
 // The endpoint still can return [NoContent], [NotModified], or an error.
-type Void = Resp[struct{}]
+type Void = Resp[Z]
+
+// Z is a zero type. Used by [Void].
+type Z = struct{}
 
 // Write response into the connection.
 func (r Resp[T]) Write(w http.ResponseWriter) {
@@ -113,6 +116,7 @@ func (r Resp[T]) Write(w http.ResponseWriter) {
 	}
 	// If status code allows for body, write the JSON response.
 	if !bodyAllowedForStatus(r.Status) {
+		w.WriteHeader(int(r.Status))
 		return
 	}
 	if r.Errors != nil {

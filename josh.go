@@ -3,6 +3,7 @@ package josh
 import (
 	"context"
 	"encoding/json"
+	"errors"
 	"net/http"
 	"strconv"
 	"time"
@@ -48,12 +49,21 @@ func SetHeader(r *http.Request, key, value string) {
 
 // Read and parse request body as JSON.
 func Read[T any](r *http.Request) (T, error) {
+	if r.ContentLength == 0 {
+		return *new(T), errors.New("request body is empty")
+	}
 	var v struct {
-		Data T `json:"data"`
+		Data *T `json:"data"`
 	}
 	decoder := json.NewDecoder(r.Body)
 	err := decoder.Decode(&v)
-	return v.Data, err
+	if err != nil {
+		return *new(T), err
+	}
+	if v.Data == nil {
+		return *new(T), errors.New("data field not found in request body")
+	}
+	return *v.Data, nil
 }
 
 // Resp is a response type.

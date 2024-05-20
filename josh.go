@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"net/http"
 	"strconv"
+	"time"
 
 	"github.com/orsinium-labs/josh/statuses"
 )
@@ -12,6 +13,19 @@ import (
 type contextKey string
 
 const headersKey contextKey = "headers"
+
+// NewServer creates and [http.Server] with safe defaults.
+func NewServer(addr string) *http.Server {
+	// https://github.com/google/go-safeweb/blob/master/safehttp/server.go#L96
+	return &http.Server{
+		Addr:              addr,
+		ReadHeaderTimeout: 3 * time.Second,
+		ReadTimeout:       5 * time.Second,
+		WriteTimeout:      5 * time.Second,
+		IdleTimeout:       30 * time.Second,
+		MaxHeaderBytes:    10 * 1024,
+	}
+}
 
 // Handler function type. Accepts a request, returns a response.
 type Handler[T any] func(*http.Request) Resp[T]
@@ -34,10 +48,12 @@ func SetHeader(r *http.Request, key, value string) {
 
 // Read and parse request body as JSON.
 func Read[T any](r *http.Request) (T, error) {
-	var v T
+	var v struct {
+		Data T `json:"data"`
+	}
 	decoder := json.NewDecoder(r.Body)
 	err := decoder.Decode(&v)
-	return v, err
+	return v.Data, err
 }
 
 // Resp is a response type.

@@ -72,3 +72,5 @@ func main() {
   http.ListenAndServe(":8080", josh.Wrap(handler))
 }
 ```
+
+To dive deeper, check out [examples](https://github.com/orsinium-labs/josh/tree/main/_examples) or go right to the [docs](https://pkg.go.dev/github.com/orsinium-labs/josh).

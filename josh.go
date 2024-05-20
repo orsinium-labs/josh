@@ -32,6 +32,14 @@ func SetHeader(r *http.Request, key, value string) {
 	headers.Set(key, value)
 }
 
+// Read and parse request body as JSON.
+func Read[T any](r *http.Request) (T, error) {
+	var v T
+	decoder := json.NewDecoder(r.Body)
+	err := decoder.Decode(&v)
+	return v, err
+}
+
 // Resp is a response type.
 //
 // The generic type T is the type of the data response.

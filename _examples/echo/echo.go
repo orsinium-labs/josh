@@ -23,13 +23,12 @@ package main
 
 import (
 	"fmt"
-	"net/http"
 	"strings"
 
 	"github.com/orsinium-labs/josh"
 )
 
-func handler(r *http.Request) josh.Resp[string] {
+func handler(r josh.Req) josh.Resp[string] {
 	msg, err := josh.Read[string](r)
 	if err != nil {
 		return josh.BadRequest[string](josh.Error{

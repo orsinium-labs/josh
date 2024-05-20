@@ -34,7 +34,7 @@ github.com/orsinium-labs/josh
 Here is a simple handler:
 
 ```go
-func handler(r *http.Request) josh.Resp[string] {
+func handler(r josh.Req) josh.Resp[string] {
   // Read JSON request body
   msg, err := josh.Read[string](r)
   if err != nil {

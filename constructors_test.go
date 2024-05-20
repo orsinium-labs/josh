@@ -2,7 +2,6 @@ package josh_test
 
 import (
 	"io"
-	"net/http"
 	"net/http/httptest"
 	"testing"
 
@@ -10,7 +9,7 @@ import (
 )
 
 func TestOk(t *testing.T) {
-	h := josh.Wrap(func(r *http.Request) josh.Resp[int] {
+	h := josh.Wrap(func(r josh.Req) josh.Resp[int] {
 		return josh.Ok(13)
 	})
 	req := httptest.NewRequest("GET", "http://example.com/foo", nil)
@@ -23,7 +22,7 @@ func TestOk(t *testing.T) {
 }
 
 func TestCreated(t *testing.T) {
-	h := josh.Wrap(func(r *http.Request) josh.Resp[int] {
+	h := josh.Wrap(func(r josh.Req) josh.Resp[int] {
 		return josh.Created(13)
 	})
 	req := httptest.NewRequest("GET", "http://example.com/foo", nil)
@@ -36,7 +35,7 @@ func TestCreated(t *testing.T) {
 }
 
 func TestAccepted(t *testing.T) {
-	h := josh.Wrap(func(r *http.Request) josh.Resp[int] {
+	h := josh.Wrap(func(r josh.Req) josh.Resp[int] {
 		return josh.Accepted(13)
 	})
 	req := httptest.NewRequest("GET", "http://example.com/foo", nil)
@@ -49,7 +48,7 @@ func TestAccepted(t *testing.T) {
 }
 
 func TestNoContent(t *testing.T) {
-	h := josh.Wrap(func(r *http.Request) josh.Void {
+	h := josh.Wrap(func(r josh.Req) josh.Void {
 		return josh.NoContent[josh.Z]()
 	})
 	req := httptest.NewRequest("GET", "http://example.com/foo", nil)
@@ -61,7 +60,7 @@ func TestNoContent(t *testing.T) {
 }
 
 func TestNotModified(t *testing.T) {
-	h := josh.Wrap(func(r *http.Request) josh.Void {
+	h := josh.Wrap(func(r josh.Req) josh.Void {
 		return josh.NotModified[josh.Z]()
 	})
 	req := httptest.NewRequest("GET", "http://example.com/foo", nil)
@@ -73,7 +72,7 @@ func TestNotModified(t *testing.T) {
 }
 
 func TestBadRequest(t *testing.T) {
-	h := josh.Wrap(func(r *http.Request) josh.Void {
+	h := josh.Wrap(func(r josh.Req) josh.Void {
 		err := josh.Error{Detail: "oh no"}
 		return josh.BadRequest[josh.Z](err)
 	})
@@ -87,7 +86,7 @@ func TestBadRequest(t *testing.T) {
 }
 
 func TestUnauthorized(t *testing.T) {
-	h := josh.Wrap(func(r *http.Request) josh.Void {
+	h := josh.Wrap(func(r josh.Req) josh.Void {
 		err := josh.Error{Detail: "oh no"}
 		return josh.Unauthorized[josh.Z](err)
 	})
@@ -101,7 +100,7 @@ func TestUnauthorized(t *testing.T) {
 }
 
 func TestForbidden(t *testing.T) {
-	h := josh.Wrap(func(r *http.Request) josh.Void {
+	h := josh.Wrap(func(r josh.Req) josh.Void {
 		err := josh.Error{Detail: "oh no"}
 		return josh.Forbidden[josh.Z](err)
 	})
@@ -115,7 +114,7 @@ func TestForbidden(t *testing.T) {
 }
 
 func TestNotFound(t *testing.T) {
-	h := josh.Wrap(func(r *http.Request) josh.Void {
+	h := josh.Wrap(func(r josh.Req) josh.Void {
 		err := josh.Error{Detail: "oh no"}
 		return josh.NotFound[josh.Z](err)
 	})

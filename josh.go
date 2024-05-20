@@ -15,6 +15,9 @@ type contextKey string
 
 const headersKey contextKey = "headers"
 
+// Req is an alias for a pointer to [http.Request].
+type Req = *http.Request
+
 // NewServer creates and [http.Server] with safe defaults.
 func NewServer(addr string) *http.Server {
 	// https://github.com/google/go-safeweb/blob/master/safehttp/server.go#L96
@@ -29,11 +32,11 @@ func NewServer(addr string) *http.Server {
 }
 
 // Handler function type. Accepts a request, returns a response.
-type Handler[T any] func(*http.Request) Resp[T]
+type Handler[T any] func(Req) Resp[T]
 
 // Wrap a [Handler] function to make it compatible with stdlib [http.HandlerFunc].
 func Wrap[T any](h Handler[T]) http.HandlerFunc {
-	return func(w http.ResponseWriter, r *http.Request) {
+	return func(w http.ResponseWriter, r Req) {
 		ctx := context.WithValue(r.Context(), headersKey, w.Header())
 		r = r.WithContext(ctx)
 		resp := h(r)
@@ -42,13 +45,13 @@ func Wrap[T any](h Handler[T]) http.HandlerFunc {
 }
 
 // Set a response header.
-func SetHeader(r *http.Request, key, value string) {
+func SetHeader(r Req, key, value string) {
 	headers := r.Context().Value(headersKey).(http.Header)
 	headers.Set(key, value)
 }
 
 // Read and parse request body as JSON.
-func Read[T any](r *http.Request) (T, error) {
+func Read[T any](r Req) (T, error) {
 	if r.ContentLength == 0 {
 		return *new(T), errors.New("request body is empty")
 	}

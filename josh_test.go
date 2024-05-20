@@ -3,7 +3,6 @@ package josh_test
 import (
 	"bytes"
 	"io"
-	"net/http"
 	"net/http/httptest"
 	"strings"
 	"testing"
@@ -19,7 +18,7 @@ func TestNewServer(t *testing.T) {
 }
 
 func TestSetHeader(t *testing.T) {
-	h := josh.Wrap(func(r *http.Request) josh.Void {
+	h := josh.Wrap(func(r josh.Req) josh.Void {
 		josh.SetHeader(r, "X-Test", "hello")
 		return josh.NoContent[josh.Z]()
 	})
@@ -33,7 +32,7 @@ func TestSetHeader(t *testing.T) {
 }
 
 func TestRead(t *testing.T) {
-	h := josh.Wrap(func(r *http.Request) josh.Resp[string] {
+	h := josh.Wrap(func(r josh.Req) josh.Resp[string] {
 		msg, err := josh.Read[string](r)
 		if err != nil {
 			panic(err)

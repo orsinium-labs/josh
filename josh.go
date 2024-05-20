@@ -116,6 +116,7 @@ func (r Resp[T]) Write(w http.ResponseWriter) {
 	}
 	// If status code allows for body, write the JSON response.
 	if !bodyAllowedForStatus(r.Status) {
+		w.Header().Add("Content-Length", "0")
 		w.WriteHeader(int(r.Status))
 		return
 	}

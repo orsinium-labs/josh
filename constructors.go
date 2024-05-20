@@ -32,6 +32,8 @@ func Accepted[T any](v T) Resp[T] {
 // Respond with 204 status code.
 //
 // Indicates that there is no content to send for this request.
+//
+// The response does not have a body.
 func NoContent[T any]() Resp[T] {
 	return Resp[T]{
 		Status: statuses.NoContent,
@@ -42,6 +44,8 @@ func NoContent[T any]() Resp[T] {
 //
 // Tells the client that the response has not been modified,
 // so the client can continue to use the same cached version of the response.
+//
+// The response does not have a body.
 func NotModified[T any]() Resp[T] {
 	return Resp[T]{
 		Status: statuses.NotModified,

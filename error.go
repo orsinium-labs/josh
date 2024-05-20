@@ -27,7 +27,7 @@ type Error struct {
 	// Source is a reference to the primary source of the error.
 	//
 	// Constructed with either [SourcePointer], [SourceParameter], or [SourceHeader].
-	Source source `json:"source,omitempty"`
+	Source *source `json:"source,omitempty"`
 
 	// Meta is an object containing non-standard meta-information about the error.
 	Meta *map[string]interface{} `json:"meta,omitempty"`
@@ -45,16 +45,16 @@ type source struct {
 }
 
 // A JSON Pointer (RFC6901) to the value in the request document that caused the error.
-func SourcePointer(v string) source {
-	return source{Pointer: v}
+func SourcePointer(v string) *source {
+	return &source{Pointer: v}
 }
 
 // Which URI query parameter caused the error.
-func SourceParameter(v string) source {
-	return source{Parameter: v}
+func SourceParameter(v string) *source {
+	return &source{Parameter: v}
 }
 
 // The name of a single request header which caused the error.
-func SourceHeader(v string) source {
-	return source{Header: v}
+func SourceHeader(v string) *source {
+	return &source{Header: v}
 }

@@ -18,7 +18,7 @@
 //
 // Response:
 //
-//	{"errors":[{"title":"Cannot parse JSON request","detail":"json: cannot unmarshal number into Go struct field .data of type string","source":{}}]}
+//	{"errors":[{"title":"Cannot parse JSON request","detail":"json: cannot unmarshal number into Go struct field .data of type string"}]}
 package main
 
 import (

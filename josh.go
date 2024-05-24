@@ -92,7 +92,7 @@ type Resp[T any] struct {
 	// Instead, use one of the constructors: [Ok], [Created], or [Accepted].
 	//
 	// https://jsonapi.org/format/#fetching-resources-responses
-	Data T `json:"data,omitempty"`
+	Data *T `json:"data,omitempty"`
 
 	// A slice of errors returned on failure.
 	//
@@ -102,6 +102,11 @@ type Resp[T any] struct {
 	//
 	// https://jsonapi.org/format/#error-objects
 	Errors []Error `json:"errors,omitempty"`
+
+	Included any `json:"included,omitempty"`
+	JSONAPI  any `json:"jsonapi,omitempty"`
+	Links    any `json:"links,omitempty"`
+	Meta     any `json:"meta,omitempty"`
 }
 
 // Void is a type alias for [Resp] for when the handler does not return any data ever.
@@ -145,12 +150,8 @@ func (r Resp[T]) writeErrors(w http.ResponseWriter) {
 			err.Title = http.StatusText(int(r.Status))
 		}
 	}
-	// https://jsonapi.org/format/#error-objects
-	v := struct {
-		Errors []Error `json:"errors"`
-	}{r.Errors}
 	// TODO: log error
-	_ = encoder.Encode(v)
+	_ = encoder.Encode(r)
 }
 
 func (r Resp[T]) writeData(w http.ResponseWriter) {
@@ -159,11 +160,8 @@ func (r Resp[T]) writeData(w http.ResponseWriter) {
 	}
 	w.WriteHeader(int(r.Status))
 	encoder := json.NewEncoder(w)
-	v := struct {
-		Data T `json:"data"`
-	}{r.Data}
 	// TODO: log error
-	_ = encoder.Encode(v)
+	_ = encoder.Encode(r)
 }
 
 func bodyAllowedForStatus(status statuses.Status) bool {

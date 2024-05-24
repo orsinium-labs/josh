@@ -1,5 +1,15 @@
 package josh
 
+// https://jsonapi.org/format/#document-resource-objects
+type Data[T any] struct {
+	ID            string `json:"id"`
+	Type          string `json:"type"`
+	Attributes    T      `json:"attributes,omitempty"`
+	Links         any    `json:"links,omitempty"`
+	Meta          any    `json:"meta,omitempty"`
+	Relationships any    `json:"relationships,omitempty"`
+}
+
 // An error response. The structure follows the JSON:API spec.
 //
 // https://jsonapi.org/format/#error-objects
@@ -30,7 +40,7 @@ type Error struct {
 	Source *source `json:"source,omitempty"`
 
 	// Meta is an object containing non-standard meta-information about the error.
-	Meta *map[string]interface{} `json:"meta,omitempty"`
+	Meta any `json:"meta,omitempty"`
 }
 
 type source struct {

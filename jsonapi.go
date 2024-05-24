@@ -1,5 +1,10 @@
 package josh
 
+// JSON:API resource object type.
+//
+// Should be used as the Data attribute for [Resp] if you want your API
+// to follow the JSON:API spec.
+//
 // https://jsonapi.org/format/#document-resource-objects
 type Data[T any] struct {
 	ID            string `json:"id"`

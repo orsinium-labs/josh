@@ -9,7 +9,7 @@ import "github.com/orsinium-labs/josh/statuses"
 func Ok[T any](v T) Resp[T] {
 	return Resp[T]{
 		Status: statuses.OK,
-		Data:   v,
+		Data:   &v,
 	}
 }
 
@@ -17,7 +17,7 @@ func Ok[T any](v T) Resp[T] {
 func Created[T any](v T) Resp[T] {
 	return Resp[T]{
 		Status: statuses.Created,
-		Data:   v,
+		Data:   &v,
 	}
 }
 
@@ -25,7 +25,7 @@ func Created[T any](v T) Resp[T] {
 func Accepted[T any](v T) Resp[T] {
 	return Resp[T]{
 		Status: statuses.Accepted,
-		Data:   v,
+		Data:   &v,
 	}
 }
 

@@ -52,3 +52,26 @@ func TestRead(t *testing.T) {
 	body := must(io.ReadAll(resp.Body))
 	eq(string(body), `{"data":"HELLO"}`+"\n")
 }
+
+func TestSingleton(t *testing.T) {
+	type User struct{ name string }
+	h := josh.Wrap(func(r josh.Req) josh.Resp[string] {
+		var err error
+		_, err = josh.GetSingleton[User](r)
+		if err == nil {
+			t.FailNow()
+		}
+		r = josh.Must(josh.WithSingleton(r, User{"aragorn"}))
+		user := josh.Must(josh.GetSingleton[User](r))
+		eq(user.name, "aragorn")
+		return josh.Ok("ok")
+	})
+	req := httptest.NewRequest("GET", "http://example.com/foo", nil)
+	w := httptest.NewRecorder()
+	h(w, req)
+	resp := w.Result()
+	eq(resp.StatusCode, 200)
+	eq(resp.Header.Get("Content-Type"), "application/vnd.api+json")
+	body := must(io.ReadAll(resp.Body))
+	eq(string(body), `{"data":"ok"}`+"\n")
+}

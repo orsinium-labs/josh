@@ -88,7 +88,7 @@ type Resp[T any] struct {
 
 	// The document's "primary data" returned on success.
 	//
-	// If possible, don't create sucessful responses directly.
+	// If possible, don't create successful responses directly.
 	// Instead, use one of the constructors: [Ok], [Created], or [Accepted].
 	//
 	// https://jsonapi.org/format/#fetching-resources-responses
@@ -166,7 +166,7 @@ func (r Resp[T]) writeData(w http.ResponseWriter) {
 
 type ctxKey[T any] struct{}
 
-// Wrap a function returning a value and and error, panic if the error is not nil.
+// Wrap a function returning a value and error, panic if the error is not nil.
 func Must[T any](v T, err error) T {
 	if err != nil {
 		panic(err)

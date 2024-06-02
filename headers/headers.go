@@ -355,7 +355,7 @@ const (
 	// https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Sec-Fetch-Mode
 	SecFetchMode Header = "Sec-Fetch-Mode"
 
-	// Indicates whether or not a navigation request was triggered by user activation. It is a Structured Header whose value is a boolean so possible values are `?0` for false and `?1` for true.
+	// Indicates whether a navigation request was triggered by user activation. It is a Structured Header whose value is a boolean, so possible values are `?0` for false and `?1` for true.
 	//
 	// https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Sec-Fetch-User
 	SecFetchUser Header = "Sec-Fetch-User"
@@ -473,12 +473,12 @@ const (
 	// https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Sec-CH-UA-Model
 	SecCHUAModel Header = "Sec-CH-UA-Model"
 
-	// User agent's underlying operation system/platform.
+	// User agent's underlying operating system/platform.
 	//
 	// https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Sec-CH-UA-Platform
 	SecCHUAPlatform Header = "Sec-CH-UA-Platform"
 
-	// User agent's underlying operation system version.
+	// User agent's underlying operating system version.
 	//
 	// https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Sec-CH-UA-Platform-Version
 	SecCHUAPlatformVersion Header = "Sec-CH-UA-Platform-Version"

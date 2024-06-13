@@ -126,3 +126,17 @@ func TestNotFound(t *testing.T) {
 	body := must(io.ReadAll(resp.Body))
 	eq(string(body), `{"errors":[{"detail":"oh no"}]}`+"\n")
 }
+
+func TestInternalServerError(t *testing.T) {
+	h := josh.Wrap(func(r josh.Req) josh.Void {
+		err := josh.Error{Detail: "oh no"}
+		return josh.InternalServerError[josh.Z](err)
+	})
+	req := httptest.NewRequest("GET", "http://example.com/foo", nil)
+	w := httptest.NewRecorder()
+	h(w, req)
+	resp := w.Result()
+	eq(resp.StatusCode, 500)
+	body := must(io.ReadAll(resp.Body))
+	eq(string(body), `{"errors":[{"detail":"oh no"}]}`+"\n")
+}

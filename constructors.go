@@ -86,3 +86,13 @@ func NotFound[T any](err Error) Resp[T] {
 		Errors: []Error{err},
 	}
 }
+
+// Respond with 500 status code.
+//
+// https://developer.mozilla.org/en-US/docs/Web/HTTP/Status/500
+func InternalServerError[T any](err Error) Resp[T] {
+	return Resp[T]{
+		Status: statuses.InternalServerError,
+		Errors: []Error{err},
+	}
+}

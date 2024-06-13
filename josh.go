@@ -52,10 +52,10 @@ func Wrap[T any](h Handler[T]) http.HandlerFunc {
 //
 // For going the other way around, see [Wrap].
 func Unwrap(h http.HandlerFunc) Handler[Z] {
-	return func(r Req) Resp[Z] {
+	return func(r Req) Void {
 		w := Must(GetSingleton[http.ResponseWriter](r))
 		h(w, r)
-		return Resp[Z]{}
+		return Void{}
 	}
 }
 

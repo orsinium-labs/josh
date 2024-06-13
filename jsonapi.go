@@ -48,6 +48,17 @@ type Error struct {
 	Meta any `json:"meta,omitempty"`
 }
 
+func (err *Error) Error() string {
+	if err == nil {
+		return ""
+	}
+	prefix := ""
+	if err.Title != "" {
+		prefix = err.Title + ": "
+	}
+	return prefix + err.Detail
+}
+
 type source struct {
 	// A JSON Pointer (RFC6901) to the value in the request document that caused the error.
 	Pointer string `json:"pointer,omitempty"`

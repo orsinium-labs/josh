@@ -36,12 +36,26 @@ func NewServer(addr string) *http.Server {
 type Handler[T any] func(Req) Resp[T]
 
 // Wrap a [Handler] function to make it compatible with stdlib [http.HandlerFunc].
+//
+// For going the other way around, see [Unwrap].
 func Wrap[T any](h Handler[T]) http.HandlerFunc {
 	return func(w http.ResponseWriter, r Req) {
 		ctx := context.WithValue(r.Context(), headersKey, w.Header())
 		r = r.WithContext(ctx)
+		r, _ = WithSingleton(r, w)
 		resp := h(r)
 		resp.Write(w)
+	}
+}
+
+// Adapter making [http.HandlerFunc] compatible with josh.
+//
+// For going the other way around, see [Wrap].
+func Unwrap(h http.HandlerFunc) Handler[Z] {
+	return func(r Req) Resp[Z] {
+		w := Must(GetSingleton[http.ResponseWriter](r))
+		h(w, r)
+		return Resp[Z]{}
 	}
 }
 
@@ -126,7 +140,9 @@ func (r Resp[T]) Write(w http.ResponseWriter) {
 	// If status code allows for body, write the JSON response.
 	if !bodyAllowedForStatus(r.Status) {
 		w.Header().Add("Content-Length", "0")
-		w.WriteHeader(int(r.Status))
+		if r.Status != 0 {
+			w.WriteHeader(int(r.Status))
+		}
 		return
 	}
 	if r.Errors != nil {

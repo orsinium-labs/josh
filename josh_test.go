@@ -3,6 +3,7 @@ package josh_test
 import (
 	"bytes"
 	"io"
+	"net/http"
 	"net/http/httptest"
 	"strings"
 	"testing"
@@ -29,6 +30,34 @@ func TestSetHeader(t *testing.T) {
 	eq(resp.StatusCode, 204)
 	eq(resp.Header.Get("X-Test"), "hello")
 	eq(resp.Header.Get("Content-Type"), "application/vnd.api+json")
+}
+
+// It should be possible to unwrap http.ResponseWriter and write the response directly.
+func TestUnwrapResponseWriter(t *testing.T) {
+	h := josh.Wrap(func(r josh.Req) josh.Void {
+		w := josh.Must(josh.GetSingleton[http.ResponseWriter](r))
+		w.WriteHeader(204)
+		return josh.Void{}
+	})
+	req := httptest.NewRequest("GET", "http://example.com/foo", nil)
+	w := httptest.NewRecorder()
+	h(w, req)
+	resp := w.Result()
+	eq(resp.StatusCode, 204)
+	eq(resp.Header.Get("Content-Type"), "")
+}
+
+func TestUnwrap(t *testing.T) {
+	hh := func(w http.ResponseWriter, r *http.Request) {
+		w.WriteHeader(203)
+	}
+	h := josh.Wrap(josh.Unwrap(hh))
+	req := httptest.NewRequest("GET", "http://example.com/foo", nil)
+	w := httptest.NewRecorder()
+	h(w, req)
+	resp := w.Result()
+	eq(resp.StatusCode, 203)
+	eq(resp.Header.Get("Content-Type"), "")
 }
 
 func TestRead(t *testing.T) {

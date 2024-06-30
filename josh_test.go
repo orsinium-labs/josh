@@ -104,3 +104,26 @@ func TestSingleton(t *testing.T) {
 	body := must(io.ReadAll(resp.Body))
 	eq(string(body), `{"data":"ok"}`+"\n")
 }
+
+func TestGetOrSetSingleton(t *testing.T) {
+	type User struct{ name string }
+	h := josh.Wrap(func(r josh.Req) josh.Resp[string] {
+		r, user := josh.GetOrSetSingleton(r, func() User {
+			return User{"aragorn"}
+		})
+		eq(user.name, "aragorn")
+		_, user = josh.GetOrSetSingleton(r, func() User {
+			return User{"gandalf"}
+		})
+		eq(user.name, "aragorn")
+		return josh.Ok("ok")
+	})
+	req := httptest.NewRequest("GET", "http://example.com/foo", nil)
+	w := httptest.NewRecorder()
+	h(w, req)
+	resp := w.Result()
+	eq(resp.StatusCode, 200)
+	eq(resp.Header.Get("Content-Type"), "application/vnd.api+json")
+	body := must(io.ReadAll(resp.Body))
+	eq(string(body), `{"data":"ok"}`+"\n")
+}

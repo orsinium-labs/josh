@@ -2,13 +2,12 @@ package josh
 
 import (
 	"reflect"
-	"runtime"
 	"sync"
 	"testing"
 )
 
 var fixtLock = sync.Mutex{}
-var fixtCache = make(map[string]map[string]any)
+var fixtCache = make(map[string]map[uintptr]any)
 
 // Call the given function and cache it for the given test.
 //
@@ -17,23 +16,25 @@ var fixtCache = make(map[string]map[string]any)
 // (from other fixtures) will use the cached value.
 //
 // The cache is test-local, including sub-tests.
+//
+//	user := josh.Fixture(t, GetUser)
 func Fixture[V any](t *testing.T, f func(t *testing.T) V) V {
 	t.Helper()
 	tname := t.Name()
-	fname := runtime.FuncForPC(reflect.ValueOf(f).Pointer()).Name()
+	fptr := reflect.ValueOf(f).Pointer()
 	fixtLock.Lock()
 	defer fixtLock.Unlock()
-	v, found := fixtCache[tname][fname]
+	v, found := fixtCache[tname][fptr]
 	if !found {
 		v = f(t)
 		if fixtCache[tname] == nil {
-			fixtCache[tname] = make(map[string]any)
+			fixtCache[tname] = make(map[uintptr]any)
 		}
-		fixtCache[tname][fname] = v
+		fixtCache[tname][fptr] = v
 		t.Cleanup(func() {
 			fixtLock.Lock()
 			defer fixtLock.Unlock()
-			delete(fixtCache[tname], fname)
+			delete(fixtCache[tname], fptr)
 		})
 	}
 	return v.(V)

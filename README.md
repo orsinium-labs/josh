@@ -34,12 +34,12 @@ github.com/orsinium-labs/josh
 Here is a simple handler:
 
 ```go
-func handler(r josh.Req) josh.Resp[string] {
+func handler(r josh.Req) josh.Resp {
   // Read JSON request body
-  msg, err := josh.Read[string](r)
+  msg, err := josh.Read(r)
   if err != nil {
     // Return an error for invalid request
-    return josh.BadRequest[string](josh.Error{
+    return josh.BadRequest(josh.Error{
       Title:  "Cannot parse JSON request",
       Detail: err.Error(),
     })

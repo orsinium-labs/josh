@@ -67,13 +67,16 @@ func SetHeader(r Req, key headers.Header, value string) {
 
 // Read and parse request body as JSON.
 func Read[T any](r Req) (T, error) {
-	if r.ContentLength == 0 {
+	// TODO: improve based on this blog post:
+	// https://www.alexedwards.net/blog/how-to-properly-parse-a-json-request-body
+	if r.Body == nil {
 		return *new(T), errors.New("request body is empty")
 	}
 	var v struct {
 		Data *T `json:"data"`
 	}
 	decoder := json.NewDecoder(r.Body)
+	decoder.DisallowUnknownFields()
 	err := decoder.Decode(&v)
 	if err != nil {
 		return *new(T), err
@@ -122,9 +125,6 @@ type Resp struct {
 	Links    any `json:"links,omitempty"`
 	Meta     any `json:"meta,omitempty"`
 }
-
-// Z is a zero type. Used by [Void].
-type Z = struct{}
 
 // Write response into the connection.
 func (r Resp) Write(w http.ResponseWriter) {

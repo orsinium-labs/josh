@@ -9,8 +9,8 @@ import (
 	"github.com/orsinium-labs/josh"
 )
 
-func noop(*http.Request) josh.Void {
-	return josh.NoContent[josh.Z]()
+func noop(*http.Request) josh.Resp {
+	return josh.NoContent()
 }
 
 func must[T any](v T, err error) T {

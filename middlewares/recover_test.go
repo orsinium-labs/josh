@@ -17,7 +17,7 @@ func eq[T comparable](a, b T) {
 }
 
 func TestRecover_Ok(t *testing.T) {
-	hf := func(r josh.Req) josh.Resp[string] {
+	hf := func(r josh.Req) josh.Resp {
 		return josh.Ok("hi")
 	}
 	h := josh.Wrap(middlewares.Recover(hf))
@@ -31,7 +31,7 @@ func TestRecover_Ok(t *testing.T) {
 }
 
 func TestRecover_Panic(t *testing.T) {
-	hf := func(r josh.Req) josh.Resp[string] {
+	hf := func(r josh.Req) josh.Resp {
 		panic("oh no")
 	}
 	h := josh.Wrap(middlewares.Recover(hf))

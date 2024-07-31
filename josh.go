@@ -33,12 +33,12 @@ func NewServer(addr string) *http.Server {
 }
 
 // Handler function type. Accepts a request, returns a response.
-type Handler[T any] func(Req) Resp[T]
+type Handler func(Req) Resp
 
 // Wrap a [Handler] function to make it compatible with stdlib [http.HandlerFunc].
 //
 // For going the other way around, see [Unwrap].
-func Wrap[T any](h Handler[T]) http.HandlerFunc {
+func Wrap(h Handler) http.HandlerFunc {
 	return func(w http.ResponseWriter, r Req) {
 		ctx := context.WithValue(r.Context(), headersKey, w.Header())
 		r = r.WithContext(ctx)
@@ -51,11 +51,11 @@ func Wrap[T any](h Handler[T]) http.HandlerFunc {
 // Adapter making [http.HandlerFunc] compatible with josh.
 //
 // For going the other way around, see [Wrap].
-func Unwrap(h http.HandlerFunc) Handler[Z] {
-	return func(r Req) Void {
+func Unwrap(h http.HandlerFunc) Handler {
+	return func(r Req) Resp {
 		w := Must(GetSingleton[http.ResponseWriter](r))
 		h(w, r)
-		return Void{}
+		return NoResponse()
 	}
 }
 
@@ -91,7 +91,7 @@ func Read[T any](r Req) (T, error) {
 // If the handler never returns data, use [Void] instead.
 //
 // https://jsonapi.org/format/#document-top-level
-type Resp[T any] struct {
+type Resp struct {
 	// The response status code.
 	//
 	// If possible, don't create empty responses directly.
@@ -106,7 +106,7 @@ type Resp[T any] struct {
 	// Instead, use one of the constructors: [Ok], [Created], or [Accepted].
 	//
 	// https://jsonapi.org/format/#fetching-resources-responses
-	Data *T `json:"data,omitempty"`
+	Data any `json:"data,omitempty"`
 
 	// A slice of errors returned on failure.
 	//
@@ -123,16 +123,11 @@ type Resp[T any] struct {
 	Meta     any `json:"meta,omitempty"`
 }
 
-// Void is a type alias for [Resp] for when the handler does not return any data ever.
-//
-// The endpoint still can return [NoContent], [NotModified], or an error.
-type Void = Resp[Z]
-
 // Z is a zero type. Used by [Void].
 type Z = struct{}
 
 // Write response into the connection.
-func (r Resp[T]) Write(w http.ResponseWriter) {
+func (r Resp) Write(w http.ResponseWriter) {
 	// Write content type and status code.
 	if w.Header().Get("Content-Type") == "" {
 		w.Header().Add("Content-Type", "application/vnd.api+json")
@@ -152,7 +147,7 @@ func (r Resp[T]) Write(w http.ResponseWriter) {
 	r.writeData(w)
 }
 
-func (r Resp[T]) writeErrors(w http.ResponseWriter) {
+func (r Resp) writeErrors(w http.ResponseWriter) {
 	if r.Status == 0 {
 		r.Status = statuses.BadRequest
 	}
@@ -170,7 +165,7 @@ func (r Resp[T]) writeErrors(w http.ResponseWriter) {
 	_ = encoder.Encode(r)
 }
 
-func (r Resp[T]) writeData(w http.ResponseWriter) {
+func (r Resp) writeData(w http.ResponseWriter) {
 	if r.Status == 0 {
 		r.Status = statuses.OK
 	}

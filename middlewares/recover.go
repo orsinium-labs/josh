@@ -7,8 +7,8 @@ import (
 )
 
 // Middleware that catches panics, recovers, logs them, and returns 500.
-func Recover[T any](h josh.Handler[T]) josh.Handler[T] {
-	return func(r josh.Req) (resp josh.Resp[T]) {
+func Recover(h josh.Handler) josh.Handler {
+	return func(r josh.Req) (resp josh.Resp) {
 		defer func() {
 			err := recover()
 			if err != nil {
@@ -23,7 +23,7 @@ func Recover[T any](h josh.Handler[T]) josh.Handler[T] {
 					)
 				}
 				errResp := josh.Error{Title: "Internal server error"}
-				resp = josh.InternalServerError[T](errResp)
+				resp = josh.InternalServerError(errResp)
 			}
 		}()
 		return h(r)

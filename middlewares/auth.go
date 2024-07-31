@@ -16,11 +16,11 @@ type AuthValidator[U any] func(string) (U, error)
 // If the validator returns an error, that erro is immediately returned
 // as an "Unathorized" response. Otherwise, the returned value (typically, the user
 // or their ID) is added into the request context using [josh.WithSingleton].
-func Auth[U, R any](v AuthValidator[U], h josh.Handler[R]) josh.Handler[R] {
-	return func(r josh.Req) josh.Resp[R] {
+func Auth[U any](v AuthValidator[U], h josh.Handler) josh.Handler {
+	return func(r josh.Req) josh.Resp {
 		user, err := validateRequest(v, r)
 		if err != nil {
-			return josh.Unauthorized[R](
+			return josh.Unauthorized(
 				josh.Error{Detail: err.Error()},
 			)
 		}

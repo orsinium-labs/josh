@@ -74,37 +74,37 @@ func GetPost(r josh.Req) josh.Resp[Post] {
 	return josh.Ok(post)
 }
 
-func UpdatePost(r josh.Req) josh.Void {
+func UpdatePost(r josh.Req) josh.Resp {
 	postId, err := strconv.Atoi(r.PathValue("id"))
 	if err != nil {
 		respErr := josh.Error{Detail: err.Error()}
-		return josh.BadRequest[josh.Z](respErr)
+		return josh.BadRequest(respErr)
 	}
 	oldPost, found := posts[postId]
 	if !found {
 		respErr := josh.Error{Detail: "post with the given ID does not exist"}
-		return josh.NotFound[josh.Z](respErr)
+		return josh.NotFound(respErr)
 	}
 	newPost, err := josh.Read[Post](r)
 	if err != nil {
 		respErr := josh.Error{Detail: err.Error()}
-		return josh.BadRequest[josh.Z](respErr)
+		return josh.BadRequest(respErr)
 	}
 	if newPost.Title != "" {
 		oldPost.Title = newPost.Title
 	}
 	posts[postId] = oldPost
-	return josh.NoContent[josh.Z]()
+	return josh.NoContent()
 }
 
-func DeletePost(r josh.Req) josh.Void {
+func DeletePost(r josh.Req) josh.Resp {
 	postId, err := strconv.Atoi(r.PathValue("id"))
 	if err != nil {
 		respErr := josh.Error{Detail: err.Error()}
-		return josh.BadRequest[josh.Z](respErr)
+		return josh.BadRequest(respErr)
 	}
 	delete(posts, postId)
-	return josh.NoContent[josh.Z]()
+	return josh.NoContent()
 }
 
 func main() {

@@ -9,10 +9,10 @@ import (
 )
 
 func TestGetID(t *testing.T) {
-	h := josh.Wrap(func(r josh.Req) josh.Resp[int] {
+	h := josh.Wrap(func(r josh.Req) josh.Resp {
 		id, errResp := josh.GetID[int](r, "id")
 		if errResp != nil {
-			return josh.BadRequest[int](*errResp)
+			return josh.BadRequest(*errResp)
 		}
 		return josh.Ok(id)
 	})

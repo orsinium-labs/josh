@@ -28,10 +28,10 @@ import (
 	"github.com/orsinium-labs/josh"
 )
 
-func handler(r josh.Req) josh.Resp[string] {
+func handler(r josh.Req) josh.Resp {
 	msg, err := josh.Read[string](r)
 	if err != nil {
-		return josh.BadRequest[string](josh.Error{
+		return josh.BadRequest(josh.Error{
 			Title:  "Cannot parse JSON request",
 			Detail: err.Error(),
 		})

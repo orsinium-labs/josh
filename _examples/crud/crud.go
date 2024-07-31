@@ -40,11 +40,11 @@ type Post struct {
 var posts map[int]Post
 var nextId = 0
 
-func CreatePost(r josh.Req) josh.Resp[Post] {
+func CreatePost(r josh.Req) josh.Resp {
 	post, err := josh.Read[Post](r)
 	if err != nil {
 		respErr := josh.Error{Detail: err.Error()}
-		return josh.BadRequest[Post](respErr)
+		return josh.BadRequest(respErr)
 	}
 	post.ID = nextId
 	posts[nextId] = post
@@ -52,7 +52,7 @@ func CreatePost(r josh.Req) josh.Resp[Post] {
 	return josh.Created(post)
 }
 
-func ListPosts(r josh.Req) josh.Resp[[]Post] {
+func ListPosts(r josh.Req) josh.Resp {
 	list := make([]Post, 0)
 	for _, post := range posts {
 		list = append(list, post)
@@ -60,16 +60,16 @@ func ListPosts(r josh.Req) josh.Resp[[]Post] {
 	return josh.Ok(list)
 }
 
-func GetPost(r josh.Req) josh.Resp[Post] {
+func GetPost(r josh.Req) josh.Resp {
 	postId, err := strconv.Atoi(r.PathValue("id"))
 	if err != nil {
 		respErr := josh.Error{Detail: err.Error()}
-		return josh.BadRequest[Post](respErr)
+		return josh.BadRequest(respErr)
 	}
 	post, found := posts[postId]
 	if !found {
 		respErr := josh.Error{Detail: "post with the given ID does not exist"}
-		return josh.NotFound[Post](respErr)
+		return josh.NotFound(respErr)
 	}
 	return josh.Ok(post)
 }

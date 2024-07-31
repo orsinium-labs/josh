@@ -40,11 +40,7 @@ func Register[R any](d *Dispatcher, t string, h func(R) Resp) {
 	}
 }
 
-func (d *Dispatcher) HandleRequest(r Req) Resp {
-	return d.HandleReader(r.Body)
-}
-
-func (d *Dispatcher) HandleReader(r io.Reader) Resp {
+func (d *Dispatcher) Read(r io.Reader) Resp {
 	envelope := struct {
 		Data *Data[json.RawMessage] `json:"data"`
 	}{}
@@ -62,6 +58,11 @@ func (d *Dispatcher) HandleReader(r io.Reader) Resp {
 	if envelope.Data == nil {
 		return BadRequest(Error{
 			Title: "JSON request misses the data field",
+		})
+	}
+	if envelope.Data.ID != "" {
+		return BadRequest(Error{
+			Title: "request cannot contain id",
 		})
 	}
 	h, found := d.handlers[envelope.Data.Type]

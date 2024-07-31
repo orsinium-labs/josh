@@ -1,10 +1,10 @@
-package josh_test
+package joshtest_test
 
 import (
 	"math/rand"
 	"testing"
 
-	"github.com/orsinium-labs/josh"
+	"github.com/orsinium-labs/josh/joshtest"
 )
 
 func getRand(*testing.T) int {
@@ -16,9 +16,9 @@ func getRand2(*testing.T) int {
 }
 
 func TestFixture(t *testing.T) {
-	r1 := josh.Fixture(t, getRand)
-	r2 := josh.Fixture(t, getRand)
-	r3 := josh.Fixture(t, getRand2)
+	r1 := joshtest.Fixture(t, getRand)
+	r2 := joshtest.Fixture(t, getRand)
+	r3 := joshtest.Fixture(t, getRand2)
 	if r1 != r2 {
 		t.FailNow()
 	}

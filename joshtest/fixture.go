@@ -1,4 +1,4 @@
-package josh
+package joshtest
 
 import (
 	"reflect"

@@ -9,7 +9,7 @@ import (
 )
 
 func TestOk(t *testing.T) {
-	h := josh.Wrap(func(r josh.Req) josh.Resp[int] {
+	h := josh.Wrap(func(r josh.Req) josh.Resp {
 		return josh.Ok(13)
 	})
 	req := httptest.NewRequest("GET", "http://example.com/foo", nil)
@@ -22,7 +22,7 @@ func TestOk(t *testing.T) {
 }
 
 func TestCreated(t *testing.T) {
-	h := josh.Wrap(func(r josh.Req) josh.Resp[int] {
+	h := josh.Wrap(func(r josh.Req) josh.Resp {
 		return josh.Created(13)
 	})
 	req := httptest.NewRequest("GET", "http://example.com/foo", nil)
@@ -35,7 +35,7 @@ func TestCreated(t *testing.T) {
 }
 
 func TestAccepted(t *testing.T) {
-	h := josh.Wrap(func(r josh.Req) josh.Resp[int] {
+	h := josh.Wrap(func(r josh.Req) josh.Resp {
 		return josh.Accepted(13)
 	})
 	req := httptest.NewRequest("GET", "http://example.com/foo", nil)
@@ -48,8 +48,8 @@ func TestAccepted(t *testing.T) {
 }
 
 func TestNoContent(t *testing.T) {
-	h := josh.Wrap(func(r josh.Req) josh.Void {
-		return josh.NoContent[josh.Z]()
+	h := josh.Wrap(func(r josh.Req) josh.Resp {
+		return josh.NoContent()
 	})
 	req := httptest.NewRequest("GET", "http://example.com/foo", nil)
 	w := httptest.NewRecorder()
@@ -60,8 +60,8 @@ func TestNoContent(t *testing.T) {
 }
 
 func TestNotModified(t *testing.T) {
-	h := josh.Wrap(func(r josh.Req) josh.Void {
-		return josh.NotModified[josh.Z]()
+	h := josh.Wrap(func(r josh.Req) josh.Resp {
+		return josh.NotModified()
 	})
 	req := httptest.NewRequest("GET", "http://example.com/foo", nil)
 	w := httptest.NewRecorder()
@@ -72,9 +72,9 @@ func TestNotModified(t *testing.T) {
 }
 
 func TestBadRequest(t *testing.T) {
-	h := josh.Wrap(func(r josh.Req) josh.Void {
+	h := josh.Wrap(func(r josh.Req) josh.Resp {
 		err := josh.Error{Detail: "oh no"}
-		return josh.BadRequest[josh.Z](err)
+		return josh.BadRequest(err)
 	})
 	req := httptest.NewRequest("GET", "http://example.com/foo", nil)
 	w := httptest.NewRecorder()
@@ -86,9 +86,9 @@ func TestBadRequest(t *testing.T) {
 }
 
 func TestUnauthorized(t *testing.T) {
-	h := josh.Wrap(func(r josh.Req) josh.Void {
+	h := josh.Wrap(func(r josh.Req) josh.Resp {
 		err := josh.Error{Detail: "oh no"}
-		return josh.Unauthorized[josh.Z](err)
+		return josh.Unauthorized(err)
 	})
 	req := httptest.NewRequest("GET", "http://example.com/foo", nil)
 	w := httptest.NewRecorder()
@@ -100,9 +100,9 @@ func TestUnauthorized(t *testing.T) {
 }
 
 func TestForbidden(t *testing.T) {
-	h := josh.Wrap(func(r josh.Req) josh.Void {
+	h := josh.Wrap(func(r josh.Req) josh.Resp {
 		err := josh.Error{Detail: "oh no"}
-		return josh.Forbidden[josh.Z](err)
+		return josh.Forbidden(err)
 	})
 	req := httptest.NewRequest("GET", "http://example.com/foo", nil)
 	w := httptest.NewRecorder()
@@ -114,9 +114,9 @@ func TestForbidden(t *testing.T) {
 }
 
 func TestNotFound(t *testing.T) {
-	h := josh.Wrap(func(r josh.Req) josh.Void {
+	h := josh.Wrap(func(r josh.Req) josh.Resp {
 		err := josh.Error{Detail: "oh no"}
-		return josh.NotFound[josh.Z](err)
+		return josh.NotFound(err)
 	})
 	req := httptest.NewRequest("GET", "http://example.com/foo", nil)
 	w := httptest.NewRecorder()
@@ -128,9 +128,9 @@ func TestNotFound(t *testing.T) {
 }
 
 func TestInternalServerError(t *testing.T) {
-	h := josh.Wrap(func(r josh.Req) josh.Void {
+	h := josh.Wrap(func(r josh.Req) josh.Resp {
 		err := josh.Error{Detail: "oh no"}
-		return josh.InternalServerError[josh.Z](err)
+		return josh.InternalServerError(err)
 	})
 	req := httptest.NewRequest("GET", "http://example.com/foo", nil)
 	w := httptest.NewRecorder()

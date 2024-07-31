@@ -19,9 +19,9 @@ func TestNewServer(t *testing.T) {
 }
 
 func TestSetHeader(t *testing.T) {
-	h := josh.Wrap(func(r josh.Req) josh.Void {
+	h := josh.Wrap(func(r josh.Req) josh.Resp {
 		josh.SetHeader(r, "X-Test", "hello")
-		return josh.NoContent[josh.Z]()
+		return josh.NoContent()
 	})
 	req := httptest.NewRequest("GET", "http://example.com/foo", nil)
 	w := httptest.NewRecorder()
@@ -34,10 +34,10 @@ func TestSetHeader(t *testing.T) {
 
 // It should be possible to unwrap http.ResponseWriter and write the response directly.
 func TestUnwrapResponseWriter(t *testing.T) {
-	h := josh.Wrap(func(r josh.Req) josh.Void {
+	h := josh.Wrap(func(r josh.Req) josh.Resp {
 		w := josh.Must(josh.GetSingleton[http.ResponseWriter](r))
 		w.WriteHeader(204)
-		return josh.Void{}
+		return josh.Resp{}
 	})
 	req := httptest.NewRequest("GET", "http://example.com/foo", nil)
 	w := httptest.NewRecorder()
@@ -61,7 +61,7 @@ func TestUnwrap(t *testing.T) {
 }
 
 func TestRead(t *testing.T) {
-	h := josh.Wrap(func(r josh.Req) josh.Resp[string] {
+	h := josh.Wrap(func(r josh.Req) josh.Resp {
 		msg, err := josh.Read[string](r)
 		if err != nil {
 			panic(err)
@@ -84,7 +84,7 @@ func TestRead(t *testing.T) {
 
 func TestSingleton(t *testing.T) {
 	type User struct{ name string }
-	h := josh.Wrap(func(r josh.Req) josh.Resp[string] {
+	h := josh.Wrap(func(r josh.Req) josh.Resp {
 		var err error
 		_, err = josh.GetSingleton[User](r)
 		if err == nil {
@@ -107,7 +107,7 @@ func TestSingleton(t *testing.T) {
 
 func TestGetOrSetSingleton(t *testing.T) {
 	type User struct{ name string }
-	h := josh.Wrap(func(r josh.Req) josh.Resp[string] {
+	h := josh.Wrap(func(r josh.Req) josh.Resp {
 		r, user := josh.GetOrSetSingleton(r, func() User {
 			return User{"aragorn"}
 		})

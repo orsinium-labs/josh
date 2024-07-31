@@ -40,11 +40,11 @@ type Post struct {
 var posts map[int]Post
 var nextId = 0
 
-func CreatePost(r josh.Req) josh.Resp[Post] {
+func CreatePost(r josh.Req) josh.Resp {
 	post, err := josh.Read[Post](r)
 	if err != nil {
 		respErr := josh.Error{Detail: err.Error()}
-		return josh.BadRequest[Post](respErr)
+		return josh.BadRequest(respErr)
 	}
 	post.ID = nextId
 	posts[nextId] = post
@@ -52,7 +52,7 @@ func CreatePost(r josh.Req) josh.Resp[Post] {
 	return josh.Created(post)
 }
 
-func ListPosts(r josh.Req) josh.Resp[[]Post] {
+func ListPosts(r josh.Req) josh.Resp {
 	list := make([]Post, 0)
 	for _, post := range posts {
 		list = append(list, post)
@@ -60,51 +60,51 @@ func ListPosts(r josh.Req) josh.Resp[[]Post] {
 	return josh.Ok(list)
 }
 
-func GetPost(r josh.Req) josh.Resp[Post] {
+func GetPost(r josh.Req) josh.Resp {
 	postId, err := strconv.Atoi(r.PathValue("id"))
 	if err != nil {
 		respErr := josh.Error{Detail: err.Error()}
-		return josh.BadRequest[Post](respErr)
+		return josh.BadRequest(respErr)
 	}
 	post, found := posts[postId]
 	if !found {
 		respErr := josh.Error{Detail: "post with the given ID does not exist"}
-		return josh.NotFound[Post](respErr)
+		return josh.NotFound(respErr)
 	}
 	return josh.Ok(post)
 }
 
-func UpdatePost(r josh.Req) josh.Void {
+func UpdatePost(r josh.Req) josh.Resp {
 	postId, err := strconv.Atoi(r.PathValue("id"))
 	if err != nil {
 		respErr := josh.Error{Detail: err.Error()}
-		return josh.BadRequest[josh.Z](respErr)
+		return josh.BadRequest(respErr)
 	}
 	oldPost, found := posts[postId]
 	if !found {
 		respErr := josh.Error{Detail: "post with the given ID does not exist"}
-		return josh.NotFound[josh.Z](respErr)
+		return josh.NotFound(respErr)
 	}
 	newPost, err := josh.Read[Post](r)
 	if err != nil {
 		respErr := josh.Error{Detail: err.Error()}
-		return josh.BadRequest[josh.Z](respErr)
+		return josh.BadRequest(respErr)
 	}
 	if newPost.Title != "" {
 		oldPost.Title = newPost.Title
 	}
 	posts[postId] = oldPost
-	return josh.NoContent[josh.Z]()
+	return josh.NoContent()
 }
 
-func DeletePost(r josh.Req) josh.Void {
+func DeletePost(r josh.Req) josh.Resp {
 	postId, err := strconv.Atoi(r.PathValue("id"))
 	if err != nil {
 		respErr := josh.Error{Detail: err.Error()}
-		return josh.BadRequest[josh.Z](respErr)
+		return josh.BadRequest(respErr)
 	}
 	delete(posts, postId)
-	return josh.NoContent[josh.Z]()
+	return josh.NoContent()
 }
 
 func main() {

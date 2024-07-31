@@ -128,6 +128,9 @@ type Resp struct {
 
 // Write response into the connection.
 func (r Resp) Write(w http.ResponseWriter) {
+	if r.Status == 0 && r.Data == nil && r.Errors == nil {
+		return
+	}
 	// Write content type and status code.
 	if w.Header().Get("Content-Type") == "" {
 		w.Header().Add("Content-Type", "application/vnd.api+json")

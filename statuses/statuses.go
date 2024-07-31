@@ -1,5 +1,7 @@
 package statuses
 
+import "net/http"
+
 // HTTP response status codes indicate whether a specific HTTP request
 // has been successfully completed.
 //
@@ -11,6 +13,31 @@ package statuses
 //   - Client error responses (400 – 499)
 //   - Server error responses (500 – 599)
 type Status int
+
+func (s Status) IsInformational() bool {
+	return s >= 100 && s <= 199
+}
+
+func (s Status) IsSuccess() bool {
+	return s >= 200 && s <= 299
+}
+
+func (s Status) IsRedirect() bool {
+	return s >= 300 && s <= 399
+}
+
+func (s Status) IsClientError() bool {
+	return s >= 400 && s <= 499
+}
+
+func (s Status) IsServerError() bool {
+	return s >= 500 && s <= 599
+}
+
+// Text for the HTTP status code. For example, "Moved Permanently".
+func (s Status) Text() string {
+	return http.StatusText(int(s))
+}
 
 const (
 	// This interim response indicates that the client should continue the request

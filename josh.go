@@ -158,7 +158,7 @@ func (r Resp) writeErrors(w http.ResponseWriter) {
 			err.Code = strconv.Itoa(int(r.Status))
 		}
 		if err.Title == "" {
-			err.Title = http.StatusText(int(r.Status))
+			err.Title = r.Status.Text()
 		}
 	}
 	// TODO: log error

@@ -2,21 +2,23 @@ package josh
 
 import (
 	"bytes"
+	"context"
 	"encoding/json"
 	"io"
+	"log/slog"
 )
 
 type Dispatcher struct {
-	handlers map[string]func(json.RawMessage) Resp
+	handlers map[string]func(context.Context, json.RawMessage) Resp
 }
 
 func NewDispatcher() Dispatcher {
 	return Dispatcher{
-		handlers: make(map[string]func(json.RawMessage) Resp),
+		handlers: make(map[string]func(context.Context, json.RawMessage) Resp),
 	}
 }
 
-func Register[R any](d *Dispatcher, t string, h func(R) Resp) {
+func Register[R any](d *Dispatcher, t string, h func(context.Context, R) Resp) {
 	if d.handlers == nil {
 		panic("josh.Dispatcher must be constructed using josh.NewDispatcher")
 	}
@@ -24,7 +26,7 @@ func Register[R any](d *Dispatcher, t string, h func(R) Resp) {
 	if exists {
 		panic("the Dispatcher already contains handler for the given type")
 	}
-	d.handlers[t] = func(raw json.RawMessage) Resp {
+	d.handlers[t] = func(ctx context.Context, raw json.RawMessage) Resp {
 		decoder := json.NewDecoder(bytes.NewBuffer(raw))
 		decoder.DisallowUnknownFields()
 		var req R
@@ -36,11 +38,11 @@ func Register[R any](d *Dispatcher, t string, h func(R) Resp) {
 				Detail: err.Error(),
 			})
 		}
-		return h(req)
+		return h(ctx, req)
 	}
 }
 
-func (d *Dispatcher) Read(r io.Reader) Resp {
+func (d *Dispatcher) Read(ctx context.Context, r io.Reader) Resp {
 	envelope := struct {
 		Data *Data[json.RawMessage] `json:"data"`
 	}{}
@@ -71,5 +73,17 @@ func (d *Dispatcher) Read(r io.Reader) Resp {
 			Title: "Unsupported request type",
 		})
 	}
-	return h(envelope.Data.Attributes)
+	ctx = patchLogger(ctx, envelope.Data.Type)
+	return h(ctx, envelope.Data.Attributes)
+}
+
+// If the context has a logger, add the request-type into the log extras.
+func patchLogger(ctx context.Context, t string) context.Context {
+	raw := ctx.Value(ctxKey[*slog.Logger]{})
+	if raw == nil {
+		return ctx
+	}
+	logger := raw.(*slog.Logger)
+	logger = logger.With("request-type", t)
+	return context.WithValue(ctx, ctxKey[*slog.Logger]{}, logger)
 }

@@ -62,7 +62,7 @@ func TestUnwrap(t *testing.T) {
 
 func TestRead(t *testing.T) {
 	h := josh.Wrap(func(r josh.Req) josh.Resp {
-		msg, err := josh.Read[string](r)
+		msg, err := josh.Read[string]("foo", r.Body)
 		if err != nil {
 			panic(err)
 		}
@@ -71,7 +71,7 @@ func TestRead(t *testing.T) {
 	})
 	req := httptest.NewRequest(
 		"GET", "http://example.com/foo",
-		bytes.NewReader([]byte(`{"data":"hello"}`)),
+		bytes.NewReader([]byte(`{"data":{"type": "foo", "attributes": "hello"}}`)),
 	)
 	w := httptest.NewRecorder()
 	h(w, req)

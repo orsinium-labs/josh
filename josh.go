@@ -4,6 +4,8 @@ import (
 	"context"
 	"encoding/json"
 	"errors"
+	"fmt"
+	"io"
 	"net/http"
 	"strconv"
 	"time"
@@ -66,16 +68,18 @@ func SetHeader(r Req, key headers.Header, value string) {
 }
 
 // Read and parse request body as JSON.
-func Read[T any](r Req) (T, error) {
+//
+// Accepts the expected value of "type" field and Req.Body.
+func Read[T any](t string, r io.Reader) (T, error) {
 	// TODO: improve based on this blog post:
 	// https://www.alexedwards.net/blog/how-to-properly-parse-a-json-request-body
-	if r.Body == nil {
+	if r == nil {
 		return *new(T), errors.New("request body is empty")
 	}
 	var v struct {
-		Data *T `json:"data"`
+		Data *Data[T] `json:"data"`
 	}
-	decoder := json.NewDecoder(r.Body)
+	decoder := json.NewDecoder(r)
 	decoder.DisallowUnknownFields()
 	err := decoder.Decode(&v)
 	if err != nil {
@@ -84,7 +88,13 @@ func Read[T any](r Req) (T, error) {
 	if v.Data == nil {
 		return *new(T), errors.New("data field not found in request body")
 	}
-	return *v.Data, nil
+	if v.Data.Type != t {
+		return *new(T), fmt.Errorf("unexpected request type: expected %s, got %s", t, v.Data.Type)
+	}
+	if v.Data.ID != "" {
+		return *new(T), errors.New("requests cannot contain id")
+	}
+	return v.Data.Attributes, nil
 }
 
 // Resp is a response type.
@@ -128,6 +138,9 @@ type Resp struct {
 
 // Write response into the connection.
 func (r Resp) Write(w http.ResponseWriter) {
+	if r.Status == 0 && r.Data == nil && r.Errors == nil {
+		return
+	}
 	// Write content type and status code.
 	if w.Header().Get("Content-Type") == "" {
 		w.Header().Add("Content-Type", "application/vnd.api+json")

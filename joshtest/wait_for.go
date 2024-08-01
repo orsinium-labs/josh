@@ -11,12 +11,14 @@ import (
 func WaitFor(maxWait time.Duration, try func() error) error {
 	deadline := time.Now().Add(maxWait)
 	var err error
+	var wait time.Duration = 1
 	for time.Now().Before(deadline) {
 		err = try()
 		if err == nil {
 			break
 		}
-		time.Sleep(5 * time.Millisecond)
+		time.Sleep(wait * time.Millisecond)
+		wait *= 2
 	}
 	return err
 }

@@ -213,12 +213,27 @@ func WithSingleton[T any](r Req, val T) (Req, error) {
 	return r.WithContext(ctx), nil
 }
 
+// Like [WithSingleton] but operates directly with [context.Context] rather than [Req].
+func CWithSingleton[T any](ctx context.Context, val T) (context.Context, error) {
+	key := ctxKey[T]{}
+	if ctx.Value(key) != nil {
+		return ctx, errors.New("context already contains value of the given type")
+	}
+	ctx = context.WithValue(ctx, key, val)
+	return ctx, nil
+}
+
 // Get from the context the value added using [WithSingleton].
 //
 // If there is no value of the given type in the context, an error is returned.
 // Use [Must] if you're sure that the value is present.
 func GetSingleton[T any](r Req) (T, error) {
-	raw := r.Context().Value(ctxKey[T]{})
+	return CGetSingleton[T](r.Context())
+}
+
+// Like [GetSingleton] but operates directly with [context.Context] rather than [Req].
+func CGetSingleton[T any](ctx context.Context) (T, error) {
+	raw := ctx.Value(ctxKey[T]{})
 	if raw == nil {
 		return *new(T), errors.New("no value of the given type in the context")
 	}

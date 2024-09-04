@@ -70,31 +70,31 @@ func SetHeader(r Req, key headers.Header, value string) {
 // Read and parse request body as JSON.
 //
 // Accepts the expected value of "type" field and Req.Body.
-func Read[T any](t string, r io.Reader) (T, error) {
-	// TODO: improve based on this blog post:
-	// https://www.alexedwards.net/blog/how-to-properly-parse-a-json-request-body
+func Read[T any](t string, r io.Reader) (Data[T], error) {
 	if r == nil {
-		return *new(T), errors.New("request body is empty")
+		return Data[T]{}, errors.New("request body is empty")
 	}
 	var v struct {
 		Data *Data[T] `json:"data"`
 	}
+	r = io.LimitReader(r, 1024*1024)
 	decoder := json.NewDecoder(r)
 	decoder.DisallowUnknownFields()
 	err := decoder.Decode(&v)
 	if err != nil {
-		return *new(T), err
+		return Data[T]{}, err
 	}
 	if v.Data == nil {
-		return *new(T), errors.New("data field not found in request body")
+		return Data[T]{}, errors.New("data field not found in request body")
 	}
-	if v.Data.Type != t {
-		return *new(T), fmt.Errorf("unexpected request type: expected %s, got %s", t, v.Data.Type)
+	if t != "" && v.Data.Type != t {
+		return *v.Data, fmt.Errorf("unexpected request type: expected %s, got %s", t, v.Data.Type)
 	}
-	if v.Data.ID != "" {
-		return *new(T), errors.New("requests cannot contain id")
+	err = decoder.Decode(&struct{}{})
+	if !errors.Is(err, io.EOF) {
+		return Data[T]{}, errors.New("request body contains more than one JSON object")
 	}
-	return v.Data.Attributes, nil
+	return *v.Data, nil
 }
 
 // Resp is a response type.

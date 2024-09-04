@@ -62,10 +62,11 @@ func TestUnwrap(t *testing.T) {
 
 func TestRead(t *testing.T) {
 	h := josh.Wrap(func(r josh.Req) josh.Resp {
-		msg, err := josh.Read[string]("foo", r.Body)
+		body, err := josh.Read[string]("foo", r.Body)
 		if err != nil {
 			panic(err)
 		}
+		msg := body.Attributes
 		msg = strings.ToUpper(msg)
 		return josh.Ok(msg)
 	})

@@ -99,10 +99,6 @@ func Read[T any](t string, r io.Reader) (Data[T], error) {
 
 // Resp is a response type.
 //
-// The generic type T is the type of the data response.
-//
-// If the handler never returns data, use [Void] instead.
-//
 // https://jsonapi.org/format/#document-top-level
 type Resp struct {
 	// The response status code.

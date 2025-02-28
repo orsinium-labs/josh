@@ -9,7 +9,7 @@ import (
 // Add the logger into the request context and add some request info into all log records.
 func WithLogger(logger *slog.Logger, h josh.Handler) josh.Handler {
 	return func(req josh.Req) josh.Resp {
-		logger = logger.With(
+		logger := logger.With(
 			"method", req.Method,
 			"pattern", req.Pattern,
 			"path", req.URL.Path,

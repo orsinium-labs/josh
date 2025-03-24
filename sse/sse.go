@@ -1,4 +1,4 @@
-package josh
+package sse
 
 import (
 	"encoding/json"

@@ -76,7 +76,7 @@ func (s *Stream) Send(msg Message) error {
 		w([]byte(msg.Event))
 		w([]byte{'\n'})
 	}
-	if msg.Data.Status != 0 {
+	if msg.Data.Data != nil || len(msg.Data.Errors) != 0 {
 		w([]byte("data: "))
 		raw, err := json.Marshal(msg.Data)
 		if err != nil {

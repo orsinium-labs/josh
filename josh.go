@@ -46,7 +46,9 @@ func Wrap(h Handler) http.HandlerFunc {
 		r = r.WithContext(ctx)
 		r, _ = WithSingleton(r, w)
 		resp := h(r)
-		resp.Write(w)
+		if !Canceled(r) {
+			resp.Write(w)
+		}
 	}
 }
 
@@ -58,6 +60,16 @@ func Unwrap(h http.HandlerFunc) Handler {
 		w := Must(GetSingleton[http.ResponseWriter](r))
 		h(w, r)
 		return NoResponse()
+	}
+}
+
+// Check if the request is canceled by the client or a middleware.
+func Canceled(r Req) bool {
+	select {
+	case <-r.Context().Done():
+		return true
+	default:
+		return false
 	}
 }
 
